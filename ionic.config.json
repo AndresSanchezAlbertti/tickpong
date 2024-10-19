@@ -1,0 +1,7 @@
+{
+  "name": "tickpong",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
