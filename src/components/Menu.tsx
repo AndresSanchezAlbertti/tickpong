@@ -36,7 +36,7 @@ const Menu: React.FC = () => {
               <IonLabel>Log In</IonLabel>
             </IonItem>
             <IonItem button onClick={() => navigateTo('/home')}>
-              <IonLabel>Elegir Modo de Juego</IonLabel>
+              <IonLabel>Altas bajas y Modificaciones</IonLabel>
             </IonItem>
           </IonMenuToggle>
         </IonList>

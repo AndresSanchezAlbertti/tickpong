@@ -1,39 +1,83 @@
-import React from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton } from '@ionic/react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonImg } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 
-const Home: React.FC = () => {
+function Home() {
+  interface Jugador {
+    id: number;
+    nombre: string;
+    edad: number;
+  }
+
+  const [jugadores, setJugadores] = useState<Jugador[]>([]);
   const history = useHistory();
 
-  const goToGame = (mode: string) => {
-    // Navegar a la pantalla de juego con el modo seleccionado
-    history.push(`/game/${mode}`);
+  useEffect(() => {
+    axios.get('http://localhost:5000/jugadores')
+      .then(response => {
+        setJugadores(response.data);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the jugadores!', error);
+      });
+  }, []);
+
+  const handleAltasClick = () => {
+    history.push('/add-player');
   };
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Modos de Juego</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
-        <h2>Selecciona un modo de entrenamiento</h2>
-        <IonButton expand="block" onClick={() => goToGame('modo1')}>
-          Modo 1: Golpes Simples
-        </IonButton>
-        <IonButton expand="block" onClick={() => goToGame('modo2')}>
-          Modo 2: Reacción Rápida
-        </IonButton>
-        <IonButton expand="block" onClick={() => goToGame('modo3')}>
-          Modo 3: Golpes Aleatorios
-        </IonButton>
-        <IonButton expand="block" onClick={() => goToGame('modo4')}>
-          Modo 4: Tiempo de Respuesta
-        </IonButton>
-      </IonContent>
-    </IonPage>
+    <div>
+      <IonCard onClick={handleAltasClick}>
+        <IonImg src="ruta/a/tu/imagen.jpg" alt="Descripción de la imagen" />
+        <IonCardHeader>
+          <IonCardTitle>ABM</IonCardTitle>
+          <IonCardSubtitle>Altas</IonCardSubtitle>
+        </IonCardHeader>
+        <IonCardContent>
+          Desde aquí podes agregar jugadores
+          <ul>
+            {jugadores.map(jugador => (
+              <li key={jugador.id}>{jugador.nombre} - {jugador.edad} años</li>
+            ))}
+          </ul>
+        </IonCardContent>
+      </IonCard>
+
+      <IonCard>
+        <IonImg src="ruta/a/tu/imagen.jpg" alt="Descripción de la imagen" />
+        <IonCardHeader>
+          <IonCardTitle>ABM</IonCardTitle>
+          <IonCardSubtitle>Bajas</IonCardSubtitle>
+        </IonCardHeader>
+        <IonCardContent>
+          Desde aquí podes eliminar jugadores
+          <ul>
+            {jugadores.map(jugador => (
+              <li key={jugador.id}>{jugador.nombre} - {jugador.edad} años</li>
+            ))}
+          </ul>
+        </IonCardContent>
+      </IonCard>
+
+      <IonCard>
+        <IonImg src="ruta/a/tu/imagen.jpg" alt="Descripción de la imagen" />
+        <IonCardHeader>
+          <IonCardTitle>ABM</IonCardTitle>
+          <IonCardSubtitle>Modificaciones</IonCardSubtitle>
+        </IonCardHeader>
+        <IonCardContent>
+          Desde aquí podes modificar jugadores
+          <ul>
+            {jugadores.map(jugador => (
+              <li key={jugador.id}>{jugador.nombre} - {jugador.edad} años</li>
+            ))}
+          </ul>
+        </IonCardContent>
+      </IonCard>
+    </div>
   );
-};
+}
 
 export default Home;
