@@ -27,6 +27,14 @@ function Home() {
     history.push('/add-player');
   };
 
+  const handleBajasClick = () => {
+    history.push('/search-player');
+  };
+
+  const handleModificacionesClick = () => {
+    history.push('/search-player');
+  };
+
   return (
     <div>
       <IonCard onClick={handleAltasClick}>
@@ -45,7 +53,7 @@ function Home() {
         </IonCardContent>
       </IonCard>
 
-      <IonCard>
+      <IonCard onClick={handleBajasClick}>
         <IonImg src="ruta/a/tu/imagen.jpg" alt="Descripción de la imagen" />
         <IonCardHeader>
           <IonCardTitle>ABM</IonCardTitle>
@@ -61,7 +69,7 @@ function Home() {
         </IonCardContent>
       </IonCard>
 
-      <IonCard>
+      <IonCard onClick={handleModificacionesClick}>
         <IonImg src="ruta/a/tu/imagen.jpg" alt="Descripción de la imagen" />
         <IonCardHeader>
           <IonCardTitle>ABM</IonCardTitle>

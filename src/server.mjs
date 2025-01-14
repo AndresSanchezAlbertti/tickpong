@@ -66,17 +66,31 @@ console.log('Base de datos y tablas sincronizadas');
 // Rutas de la API
 app.get('/jugadores', async (req, res) => {
   try {
-    const { nombre, apellido } = req.query; // Obtén los parámetros de búsqueda desde la URL
+    const { id } = req.query; // Obtén los parámetros de búsqueda desde la URL
     const whereClause = {};
 
-    if (nombre) whereClause.nombre = nombre;
-    if (apellido) whereClause.apellido = apellido;
+    if (id) whereClause.nombre = id;
+    
 
     const jugadores = await Jugador.findAll({ where: whereClause }); // Busca en la base de datos
     res.json(jugadores);
   } catch (error) {
     console.error('Error al buscar jugadores:', error);
     res.status(500).json({ error: 'Error al buscar jugadores' });
+  }
+});
+app.get('/jugadores/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const jugador = await Jugador.findByPk(id);
+    if (jugador) {
+      res.json(jugador);
+    } else {
+      res.status(404).json({ error: 'Jugador no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al buscar jugador', error);
+    res.status(500).json({ error: 'Error al buscar jugador' });
   }
 });
 
