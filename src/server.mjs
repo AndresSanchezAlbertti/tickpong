@@ -1,6 +1,8 @@
 import express from 'express';
 import { Sequelize, DataTypes } from 'sequelize';
 import cors from 'cors';
+import axios from 'axios';
+
 
 const app = express();
 const port = 5000;
@@ -23,8 +25,13 @@ try {
   console.error('No se pudo conectar a la base de datos:', error);
 }
 
-// Definir un modelo
+// Definir un modelo para la tabla Jugador
 const Jugador = sequelize.define('Jugador', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   nombre: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -59,26 +66,42 @@ const Jugador = sequelize.define('Jugador', {
   },
 });
 
-// Sincronizar el modelo con la base de datos
-await sequelize.sync();
-console.log('Base de datos y tablas sincronizadas');
-
-// Rutas de la API
-app.get('/jugadores', async (req, res) => {
-  try {
-    const { id } = req.query; // Obtén los parámetros de búsqueda desde la URL
-    const whereClause = {};
-
-    if (id) whereClause.nombre = id;
-    
-
-    const jugadores = await Jugador.findAll({ where: whereClause }); // Busca en la base de datos
-    res.json(jugadores);
-  } catch (error) {
-    console.error('Error al buscar jugadores:', error);
-    res.status(500).json({ error: 'Error al buscar jugadores' });
-  }
+// Definir un modelo para la tabla WebScrapingData
+const WebScrapingData = sequelize.define('WebScrapingData', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  content: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
 });
+
+// Sincronizar los modelos con la base de datos
+await sequelize.sync();
+console.log('Database & tables created!');
+
+// Función para realizar web scraping
+const scrapeWebsite = async (url) => {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const title = $('title').text();
+    const content = $('body').text();
+    return { title, content };
+  } catch (error) {
+    console.error('Error al realizar web scraping', error);
+    throw error;
+  }
+};
+
+// Endpoint para obtener un jugador por ID
 app.get('/jugadores/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -94,6 +117,24 @@ app.get('/jugadores/:id', async (req, res) => {
   }
 });
 
+// Endpoint para eliminar un jugador por ID
+app.delete('/jugadores/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const jugador = await Jugador.findByPk(id);
+    if (jugador) {
+      await jugador.destroy();
+      res.json({ message: 'Jugador eliminado exitosamente' });
+    } else {
+      res.status(404).json({ error: 'Jugador no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al eliminar jugador', error);
+    res.status(500).json({ error: 'Error al eliminar jugador' });
+  }
+});
+
+// Endpoint para agregar un jugador
 app.post('/jugadores', async (req, res) => {
   const {
     nombre,
@@ -105,11 +146,9 @@ app.post('/jugadores', async (req, res) => {
     telefono,
     telefono_emergencia,
   } = req.body;
-
   if (!nombre || !apellido || !fecha_nacimiento || !edad || !anio_ingreso || !direccion || !telefono || !telefono_emergencia) {
     return res.status(400).json({ error: 'Por favor, completa todos los campos.' });
   }
-
   try {
     const nuevoJugador = await Jugador.create(req.body);
     res.json(nuevoJugador);
@@ -119,6 +158,28 @@ app.post('/jugadores', async (req, res) => {
   }
 });
 
+// Endpoint para modificar un jugador por ID
+app.patch('/jugadores/:id', async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+  try {
+    const jugador = await Jugador.findByPk(id);
+    if (jugador) {
+      await jugador.update(updates);
+      res.json(jugador);
+    } else {
+      res.status(404).json({ error: 'Jugador no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al modificar jugador', error);
+    res.status(500).json({ error: 'Error al modificar jugador' });
+  }
+});
+
+// Endpoint para realizar web scraping y almacenar los datos en la base de datos
+
+
+// Iniciar el servidor
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
